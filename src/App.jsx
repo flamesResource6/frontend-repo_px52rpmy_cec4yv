@@ -1,29 +1,30 @@
-import { useState } from 'react'
-import ChapterIntro from './components/ChapterIntro'
-import ChapterOath from './components/ChapterOath'
-import ChapterPhilosophy from './components/ChapterPhilosophy'
-import ChapterSins from './components/ChapterSins'
+import ActVoidEntry from './components/ActVoidEntry'
+import ActSplitRevelation from './components/ActSplitRevelation'
+import ActConfession from './components/ActConfession'
+import ActTransitionStorm from './components/ActTransitionStorm'
+import ActConstellation from './components/ActConstellation'
 
 function App() {
-  const [reveal, setReveal] = useState(false)
-
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Chapter 1: Mysterious opening with ELANOR reveal */}
-      <ChapterIntro onReveal={() => setReveal(true)} />
+      {/* ACT I: The Void Entry */}
+      <ActVoidEntry />
 
-      {/* Chapter 2: The Oath (brand reveal / split page) */}
-      <ChapterOath />
+      {/* ACT II: The Split Revelation */}
+      <ActSplitRevelation />
 
-      {/* Chapter 3: Philosophy (typewriter) */}
-      <ChapterPhilosophy />
+      {/* ACT III: The Confession */}
+      <ActConfession />
 
-      {/* Chapter 4: Choose your sin */}
-      <ChapterSins />
+      {/* ACT IV: Storm Before Choice */}
+      <ActTransitionStorm />
+
+      {/* ACT V: The Constellation */}
+      <ActConstellation />
 
       {/* Footer ritual note */}
       <footer className="bg-black/95 border-t border-white/10 py-10">
-        <div className="max-w-6xl mx-auto px-6 text-center text-white/50 font-cormorant">
+        <div className="max-w-6xl mx-auto px-6 text-center text-white/60 font-cormorant">
           Not a product page. A confession.
         </div>
       </footer>
