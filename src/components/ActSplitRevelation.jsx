@@ -1,262 +1,221 @@
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useAnimation } from 'framer-motion'
+import { useEffect } from 'react'
 
-// Utility to create a range array
+// Tiny helpers
 const range = (n) => Array.from({ length: n }, (_, i) => i)
+const rand = (min, max) => Math.random() * (max - min) + min
 
 export default function ActSplitRevelation() {
-  const { scrollYProgress } = useScroll()
-  const archY = useTransform(scrollYProgress, [0, 1], [0, -60])
+  const wordmark = useAnimation()
+  const blade = useAnimation()
+  const halves = useAnimation()
+  const divider = useAnimation()
+  const quote = useAnimation()
+  const shake = useAnimation()
+
+  useEffect(() => {
+    async function run() {
+      // Spotlight fade-in on the wordmark
+      await wordmark.start({ opacity: 1, filter: 'brightness(100%)', transition: { duration: 2, ease: [0.16, 1, 0.3, 1] } })
+      // Blade drops
+      blade.start({ y: ['-60vh', '50vh'], transition: { duration: 1.5, ease: [0.2, 0.8, 0.2, 1] } })
+      // Screen shake on impact near bottom
+      await shake.start({
+        x: [0, 2, -2, 2, -1, 0],
+        y: [0, -1, 1, -1, 0.5, 0],
+        transition: { duration: 0.3 }
+      })
+      // Split the halves
+      await halves.start({
+        '--leftX': '-22vw',
+        '--rightX': '22vw',
+        '--leftRot': '-5deg',
+        '--rightRot': '5deg',
+        transition: { duration: 1.5, ease: [0.2, 0.8, 0.2, 1] }
+      })
+      // Rotate blade to horizontal and turn into divider
+      await blade.start({ rotate: 90, transition: { duration: 1, ease: [0.2, 0.8, 0.2, 1] } })
+      divider.start({
+        width: '100%', opacity: 1, boxShadow: ['0 0 30px #DC143C, 0 0 60px #DC143C', '0 0 10px #DC143C, 0 0 40px #DC143C', '0 0 30px #DC143C, 0 0 60px #DC143C'],
+        transition: { duration: 2.2, ease: 'easeInOut', repeat: Infinity, repeatType: 'reverse' }
+      })
+      // Reveal the quote
+      quote.start({ opacity: 1, y: 0, transition: { duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 } })
+    }
+    run()
+  }, [])
+
+  // Precompute particles to avoid layout shifts
+  const embers = range(28).map((i) => ({
+    key: `ember-${i}`,
+    left: rand(5, 95),
+    delay: rand(0, 8),
+    duration: rand(10, 18),
+    size: rand(4, 6)
+  }))
+  const sparks = range(10).map((i) => ({
+    key: `spark-${i}`,
+    left: rand(35, 65),
+    top: rand(30, 55),
+    delay: rand(0, 5),
+    duration: 0.8
+  }))
 
   return (
-    <section className="relative min-h-[120vh] text-white overflow-hidden">
-      {/* Breathing radial gradient base */}
+    <section className="relative min-h-[120vh] overflow-hidden text-white">
+      {/* BASE: Deep radial gradient (spotlight) with slow breathing */}
       <motion.div
         aria-hidden
         className="absolute inset-0"
-        animate={{ filter: [
-          'brightness(100%)',
-          'brightness(95%)',
-          'brightness(100%)',
-        ] }}
+        animate={{ filter: ['brightness(98%)', 'brightness(93%)', 'brightness(98%)'] }}
         transition={{ duration: 60, ease: 'linear', repeat: Infinity }}
         style={{
-          background: 'radial-gradient(circle at 50% 48%, rgba(88,12,24,0.9) 0%, rgba(42,7,13,0.96) 40%, rgba(10,4,6,1) 70%, #000 100%)'
+          background: 'radial-gradient(circle at 50% 50%, #2A0A0F 0%, #110408 55%, #000000 100%)'
         }}
       />
 
-      {/* Subtle damask watermark pattern (barely visible) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.02] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\" viewBox=\"0 0 300 300\"><defs><pattern id=\"d\" width=\"150\" height=\"150\" patternUnits=\"userSpaceOnUse\"><path d=\"M75 0c10 20 30 35 50 45-20 10-40 25-50 45-10-20-30-35-50-45 20-10 40-25 50-45Z\" fill=\"%23ffffff\" fill-opacity=\"0.8\"/><circle cx=\"75\" cy=\"75\" r=\"16\" fill=\"%23ffffff\" fill-opacity=\"0.7\"/></pattern></defs><rect width=\"100%\" height=\"100%\" fill=\"url(%23d)\"/></svg>')",
-          backgroundSize: '360px 360px'
-        }}
-      />
+      {/* Heavy vignette to frame the stage */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none" style={{
+        background: 'radial-gradient(circle at 50% 48%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.3) 65%, rgba(0,0,0,0.6) 100%)'
+      }} />
 
-      {/* Velvet texture overlay (tactile luxury) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-multiply"
-        style={{
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1760764541302-e3955fbc6b2b?ixid=M3w3OTkxMTl8MHwxfHNlYXJjaHwxfHxjZXJhbWljJTIwcG90dGVyeSUyMGhhbmRtYWRlfGVufDB8MHx8fDE3NjM0MTE5NzJ8MA&ixlib=rb-4.1.0&w=1600&auto=format&fit=crop&q=80)",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      />
-
-      {/* Vignette to focus center */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.6) 100%)'
-        }}
-      />
-
-      {/* Gothic arch silhouettes left/right (extreme deep background) */}
-      <motion.div aria-hidden style={{ y: archY }} className="pointer-events-none absolute inset-0 opacity-[0.04]">
-        {/* Left arch */}
-        <svg className="absolute left-0 top-0 h-full" viewBox="0 0 200 1000" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="archGradL" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path d="M0,1000 L0,260 C0,120 80,40 100,0 C120,40 200,120 200,260 L200,1000 Z" fill="url(#archGradL)" />
+      {/* Gothic arches (visible silhouettes) */}
+      <div aria-hidden className="absolute inset-0 opacity-[0.08] pointer-events-none">
+        {/* Left */}
+        <svg className="absolute left-0 top-0 h-full" viewBox="0 0 220 1000" preserveAspectRatio="none">
+          <path d="M0,1000 L0,260 C0,120 90,40 110,0 C130,40 220,120 220,260 L220,1000 Z" fill="#1b1b1b" />
         </svg>
-        {/* Right arch */}
-        <svg className="absolute right-0 top-0 h-full" viewBox="0 0 200 1000" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="archGradR" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path d="M0,1000 L0,260 C0,120 80,40 100,0 C120,40 200,120 200,260 L200,1000 Z" fill="url(#archGradR)" transform="scale(-1,1) translate(-200,0)" />
+        {/* Right */}
+        <svg className="absolute right-0 top-0 h-full" viewBox="0 0 220 1000" preserveAspectRatio="none">
+          <path d="M0,1000 L0,260 C0,120 90,40 110,0 C130,40 220,120 220,260 L220,1000 Z" fill="#1b1b1b" transform="scale(-1,1) translate(-220,0)" />
         </svg>
-      </motion.div>
-
-      {/* Blood-red light rays from corners (slow rotation) */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -left-10 -top-10 w-[70vw] h-[70vh] origin-top-left"
-        animate={{ rotate: [10, -10, 10] }}
-        transition={{ duration: 45, ease: 'easeInOut', repeat: Infinity }}
-        style={{
-          background: 'conic-gradient(from 315deg at 0% 0%, rgba(220,20,60,0.08), rgba(220,20,60,0.0) 45%)',
-          filter: 'blur(6px)'
-        }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 w-[70vw] h-[70vh] origin-top-right"
-        animate={{ rotate: [-10, 10, -10] }}
-        transition={{ duration: 45, ease: 'easeInOut', repeat: Infinity }}
-        style={{
-          background: 'conic-gradient(from 225deg at 100% 0%, rgba(220,20,60,0.08), rgba(220,20,60,0.0) 45%)',
-          filter: 'blur(6px)'
-        }}
-      />
-
-      {/* Horizontal fog layers (parallax, different speeds) */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute bottom-10 left-0 right-0 h-[34vh] opacity-[0.12] mix-blend-screen"
-        animate={{ x: [ -120, 120 ] }}
-        transition={{ duration: 120, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }}
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=1600&auto=format&fit=crop)',
-          backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(2px)'
-        }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute bottom-16 left-0 right-0 h-[28vh] opacity-[0.14] mix-blend-screen"
-        animate={{ x: [ -200, 200 ] }}
-        transition={{ duration: 90, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }}
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1600&auto=format&fit=crop)',
-          backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(1.5px)'
-        }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-0 right-0 h-[24vh] opacity-[0.1] mix-blend-screen"
-        animate={{ x: [ -260, 260 ] }}
-        transition={{ duration: 75, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }}
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop)',
-          backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(1.5px)'
-        }}
-      />
-
-      {/* Rising gold embers (ambient loop) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        {range(28).map((i) => {
-          const left = Math.random() * 100
-          const delay = Math.random() * 10
-          const duration = 10 + Math.random() * 14
-          const size = 1 + Math.random() * 2.5
-          return (
-            <motion.span
-              key={`ember-${i}`}
-              className="absolute rounded-full bg-[rgba(232,197,125,0.9)] shadow-[0_0_12px_2px_rgba(232,197,125,0.45)]"
-              style={{ left: `${left}%`, bottom: '-4%', width: size, height: size }}
-              animate={{ y: ['0%', '-110%'], opacity: [0, 1, 0] }}
-              transition={{ duration, delay, repeat: Infinity, ease: 'easeOut' }}
-            />
-          )
-        })}
       </div>
 
-      {/* Red sparks (brief flickers mid-screen) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        {range(7).map((i) => {
-          const left = 20 + Math.random() * 60
-          const top = 30 + Math.random() * 35
-          const delay = Math.random() * 6
-          const duration = 0.5 + Math.random() * 0.4
-          return (
-            <motion.span
-              key={`spark-${i}`}
-              className="absolute bg-red-500 rounded-full"
-              style={{ left: `${left}%`, top: `${top}%`, width: 2, height: 2, boxShadow: '0 0 14px 4px rgba(255,0,0,0.35)' }}
-              animate={{ opacity: [0, 1, 0], scale: [0.6, 1.5, 0.6] }}
-              transition={{ duration, delay, repeat: Infinity, ease: 'easeOut' }}
-            />
-          )
-        })}
+      {/* Damask watermark (5%) */}
+      <div aria-hidden className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay" style={{
+        backgroundImage:
+          "url('data:image/svg+xml;utf8,<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"300\\" height=\\"300\\" viewBox=\\"0 0 300 300\\"><defs><pattern id=\\"d\\" width=\\"150\\" height=\\"150\\" patternUnits=\\"userSpaceOnUse\\"><path d=\\"M75 0c10 20 30 35 50 45-20 10-40 25-50 45-10-20-30-35-50-45 20-10 40-25 50-45Z\\" fill=\\"%23ffffff\\" fill-opacity=\\"0.6\\"/><circle cx=\\"75\\" cy=\\"75\\" r=\\"16\\" fill=\\"%23ffffff\\" fill-opacity=\\"0.5\\"/></pattern></defs><rect width=\\"100%\\" height=\\"100%\\" fill=\\"url(%23d)\\"/></svg>')",
+        backgroundSize: '360px 360px'
+      }} />
+
+      {/* Film grain (20%) */}
+      <div aria-hidden className="absolute inset-0 opacity-20 pointer-events-none mix-blend-soft-light" style={{
+        backgroundImage: 'url(https://grainy-gradients.vercel.app/noise.svg)',
+        backgroundSize: 'auto'
+      }} />
+
+      {/* Stage red light beams from corners (obvious) */}
+      <motion.div aria-hidden className="absolute -left-10 -top-10 w-[220px] h-[120vh] origin-top-left pointer-events-none" animate={{ rotate: [12, -12, 12] }} transition={{ duration: 45, ease: 'easeInOut', repeat: Infinity }} style={{
+        background: 'linear-gradient(180deg, rgba(139,0,0,0.15), rgba(139,0,0,0))', filter: 'blur(8px)'
+      }} />
+      <motion.div aria-hidden className="absolute -right-10 -top-10 w-[220px] h-[120vh] origin-top-right pointer-events-none" animate={{ rotate: [-12, 12, -12] }} transition={{ duration: 45, ease: 'easeInOut', repeat: Infinity }} style={{
+        background: 'linear-gradient(180deg, rgba(139,0,0,0.15), rgba(139,0,0,0))', filter: 'blur(8px)'
+      }} />
+
+      {/* THICK FOG LAYERS (dense, different speeds) */}
+      <motion.div aria-hidden className="absolute bottom-[18vh] left-0 right-0 h-[28vh] opacity-[0.12] mix-blend-screen pointer-events-none" animate={{ x: [-300, 300] }} transition={{ duration: 140, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }} style={{
+        backgroundImage: 'url(https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=1600&auto=format&fit=crop)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(2px)'
+      }} />
+      <motion.div aria-hidden className="absolute bottom-[8vh] left-0 right-0 h-[24vh] opacity-[0.16] mix-blend-screen pointer-events-none" animate={{ x: [-240, 240] }} transition={{ duration: 110, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }} style={{
+        backgroundImage: 'url(https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1600&auto=format&fit=crop)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(2px)'
+      }} />
+      <motion.div aria-hidden className="absolute bottom-0 left-0 right-0 h-[22vh] opacity-[0.18] mix-blend-screen pointer-events-none" animate={{ x: [-180, 180] }} transition={{ duration: 90, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }} style={{
+        backgroundImage: 'url(https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1600&auto=format&fit=crop)', backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(1.5px)'
+      }} />
+
+      {/* Rising gold embers (20-30, 4-6px) */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none">
+        {embers.map((e) => (
+          <motion.span key={e.key} className="absolute rounded-full" style={{ left: `${e.left}%`, bottom: '-4%', width: e.size, height: e.size, background: 'rgba(232,197,71,0.95)', boxShadow: '0 0 18px 6px rgba(232,197,71,0.45)' }} animate={{ y: ['0%', '-115%'], opacity: [0, 1, 0] }} transition={{ duration: e.duration, delay: e.delay, repeat: Infinity, ease: 'easeOut' }} />
+        ))}
       </div>
 
-      {/* Content: Wordmark split */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-28">
+      {/* Red sparks (8-12) around split area */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none">
+        {sparks.map((s) => (
+          <motion.span key={s.key} className="absolute rounded-full" style={{ left: `${s.left}%`, top: `${s.top}%`, width: 3, height: 3, background: '#DC143C', boxShadow: '0 0 16px 6px rgba(220,20,60,0.8)' }} animate={{ opacity: [0, 1, 0], scale: [0.6, 1.8, 0.6] }} transition={{ duration: s.duration, delay: s.delay, repeat: Infinity, ease: 'easeOut' }} />
+        ))}
+      </div>
+
+      {/* CONTENT WRAPPER with shake effect on impact */}
+      <motion.div animate={shake} className="relative z-10 max-w-7xl mx-auto px-6 pt-28 pb-36">
         <div className="flex flex-col items-center justify-center text-center">
-          {/* Wordmark materialization */}
-          <div className="relative">
-            <motion.h2
-              initial={{ opacity: 0, scale: 0.96, letterSpacing: '0.5em' }}
-              whileInView={{ opacity: 1, scale: 1, letterSpacing: '0.12em' }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-7xl md:text-8xl font-cinzel drop-shadow-[0_0_18px_rgba(239,68,68,0.25)]"
-              style={{ textShadow: '0 0 18px rgba(239,68,68,0.25)' }}
-            >
-              ELANOR
-            </motion.h2>
-            {/* Blade line */}
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              whileInView={{ height: '16rem', opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.9 }}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px bg-gradient-to-b from-red-500/0 via-red-500 to-red-500/0"
-            />
-          </div>
+          {/* ELANOR wordmark (big, outlined gold, letterpress, red glow) */}
+          <motion.h2
+            initial={{ opacity: 0, filter: 'brightness(85%)' }}
+            animate={wordmark}
+            className="font-cinzel leading-none select-none"
+            style={{
+              fontSize: 'clamp(64px, 12vw, 180px)',
+              letterSpacing: '0.15em',
+              color: '#FFFFFF',
+              WebkitTextStroke: '2px #D4AF37',
+              textShadow: '0 1px 0 #111, 0 2px 2px rgba(0,0,0,0.8), 0 -1px 0 rgba(255,255,255,0.15), 0 0 30px rgba(220,20,60,0.8)'
+            }}
+          >
+            ELANOR
+          </motion.h2>
 
-          {/* Split halves with subtle 3D */}
-          <div className="relative mt-12 h-20 w-full max-w-3xl">
-            <motion.div
-              initial={{ x: 0, rotateY: 0 }}
-              whileInView={{ x: '-7%', rotateY: -6 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.9, ease: 'easeOut' }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <span className="text-5xl md:text-6xl font-cinzel tracking-[0.35em]">ELA</span>
-            </motion.div>
-            <motion.div
-              initial={{ x: 0, rotateY: 0 }}
-              whileInView={{ x: '7%', rotateY: 6 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.9, ease: 'easeOut' }}
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <span className="text-5xl md:text-6xl font-cinzel tracking-[0.35em]">NOR</span>
-            </motion.div>
-          </div>
+          {/* VERTICAL BLADE (dramatic) */}
+          <motion.div
+            initial={{ y: '-60vh', rotate: 0 }}
+            animate={blade}
+            className="relative mt-8"
+            style={{ width: 5, height: '50vh' }}
+          >
+            <div className="absolute inset-0" style={{
+              background: '#DC143C',
+              boxShadow: '0 0 30px #DC143C, 0 0 60px #DC143C'
+            }} />
+            <div className="absolute inset-0" style={{
+              background: 'linear-gradient(to bottom, rgba(220,20,60,0), rgba(220,20,60,0.8), rgba(220,20,60,0))',
+              filter: 'blur(6px)'
+            }} />
+          </motion.div>
 
-          {/* Divider bar */}
+          {/* SPLIT HALVES (clean ELA | NOR, wide gap, 3D tilt) */}
+          <motion.div
+            style={{ '--leftX': '0vw', '--rightX': '0vw', '--leftRot': '0deg', '--rightRot': '0deg' }}
+            animate={halves}
+            className="relative mt-10 h-[140px] w-full max-w-5xl"
+          >
+            <div className="absolute inset-y-0 left-1/2 -translate-x-[55%] flex items-center" style={{ transform: 'translateX(calc(-55% + var(--leftX))) rotateY(var(--leftRot))', transformStyle: 'preserve-3d' }}>
+              <span className="font-cinzel select-none" style={{ fontSize: 'clamp(48px, 8vw, 140px)', letterSpacing: '0.15em', textShadow: '0 1px 0 #111, 0 2px 2px rgba(0,0,0,0.8)' }}>ELA</span>
+            </div>
+            <div className="absolute inset-y-0 left-1/2 -translate-x-[45%] flex items-center" style={{ transform: 'translateX(calc(-45% + var(--rightX))) rotateY(var(--rightRot))', transformStyle: 'preserve-3d' }}>
+              <span className="font-cinzel select-none" style={{ fontSize: 'clamp(48px, 8vw, 140px)', letterSpacing: '0.15em', textShadow: '0 1px 0 #111, 0 2px 2px rgba(0,0,0,0.8)' }}>NOR</span>
+            </div>
+          </motion.div>
+
+          {/* DIVIDER BAR (full width, pulsing glow) and red underglow fog */}
           <motion.div
             initial={{ width: 0, opacity: 0 }}
-            whileInView={{ width: '100%', opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9 }}
-            className="mt-8 h-1 bg-red-600 shadow-[0_0_40px_8px_rgba(220,20,60,0.45)]"
-          />
+            animate={divider}
+            className="relative mt-12 h-[8px] w-0 bg-[#DC143C]"
+          >
+            {/* Volumetric underglow */}
+            <div className="absolute -bottom-10 left-0 right-0 h-20 pointer-events-none" style={{
+              background: 'radial-gradient(ellipse at 50% 100%, rgba(220,20,60,0.35) 0%, rgba(220,20,60,0.0) 70%)', filter: 'blur(12px)'
+            }} />
+          </motion.div>
 
-          {/* Oath */}
+          {/* QUOTE (big, gold, glowing) */}
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="mt-8 text-2xl md:text-3xl font-cormorant"
-            style={{ color: 'rgb(232 197 125)' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={quote}
+            className="font-cormorant italic select-none"
+            style={{
+              marginTop: '120px',
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              color: '#E8C547',
+              letterSpacing: '0.03em',
+              textShadow: '0 0 20px rgba(232, 197, 71, 0.5)'
+            }}
           >
             “Seven scents. Seven temptations. Unapologetically yours.”
           </motion.p>
         </div>
-      </div>
-
-      {/* Additional radial rays burst around split moment (one-time) */}
-      <div className="pointer-events-none absolute inset-0">
-        {range(36).map((i) => (
-          <motion.span
-            key={`ray-${i}`}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: [0, 1, 0] }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.4, delay: i * 0.03 }}
-            className="absolute left-1/2 top-1/2 h-px w-40 origin-left bg-red-400/60"
-            style={{ transform: `rotate(${i * 10}deg) translateX(8px)` }}
-          />
-        ))}
-      </div>
+      </motion.div>
     </section>
   )
 }
