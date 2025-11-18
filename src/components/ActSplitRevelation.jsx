@@ -1,5 +1,5 @@
 import { motion, useAnimation } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 // Tiny helpers
 const range = (n) => Array.from({ length: n }, (_, i) => i)
@@ -12,6 +12,12 @@ export default function ActSplitRevelation() {
   const divider = useAnimation()
   const quote = useAnimation()
   const shake = useAnimation()
+
+  // Safely build the damask data-URI to avoid esbuild parsing issues
+  const damaskUrl = useMemo(() => {
+    const svg = `\n      <svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">\n        <defs>\n          <pattern id="d" width="150" height="150" patternUnits="userSpaceOnUse">\n            <path d="M75 0c10 20 30 35 50 45-20 10-40 25-50 45-10-20-30-35-50-45 20-10 40-25 50-45Z" fill="#ffffff" fill-opacity="0.6"/>\n            <circle cx="75" cy="75" r="16" fill="#ffffff" fill-opacity="0.5"/>\n          </pattern>\n        </defs>\n        <rect width="100%" height="100%" fill="url(#d)"/>\n      </svg>\n    `.trim()
+    return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`
+  }, [])
 
   useEffect(() => {
     async function run() {
@@ -93,8 +99,7 @@ export default function ActSplitRevelation() {
 
       {/* Damask watermark (5%) */}
       <div aria-hidden className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay" style={{
-        backgroundImage:
-          "url('data:image/svg+xml;utf8,<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"300\\" height=\\"300\\" viewBox=\\"0 0 300 300\\"><defs><pattern id=\\"d\\" width=\\"150\\" height=\\"150\\" patternUnits=\\"userSpaceOnUse\\"><path d=\\"M75 0c10 20 30 35 50 45-20 10-40 25-50 45-10-20-30-35-50-45 20-10 40-25 50-45Z\\" fill=\\"%23ffffff\\" fill-opacity=\\"0.6\\"/><circle cx=\\"75\\" cy=\\"75\\" r=\\"16\\" fill=\\"%23ffffff\\" fill-opacity=\\"0.5\\"/></pattern></defs><rect width=\\"100%\\" height=\\"100%\\" fill=\\"url(%23d)\\"/></svg>')",
+        backgroundImage: damaskUrl,
         backgroundSize: '360px 360px'
       }} />
 
