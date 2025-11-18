@@ -1,4 +1,5 @@
 import ActVoidEntry from './components/ActVoidEntry'
+import ActBloodOath from './components/ActBloodOath'
 import ActConfession from './components/ActConfession'
 import ActTransitionStorm from './components/ActTransitionStorm'
 import ActConstellation from './components/ActConstellation'
@@ -9,7 +10,10 @@ function App() {
       {/* ACT I: The Void Entry */}
       <ActVoidEntry />
 
-      {/* ACT III: The Confession (Act II removed) */}
+      {/* SCREEN 2: THE BLOOD OATH (Redesigned) */}
+      <ActBloodOath />
+
+      {/* ACT III: The Confession */}
       <ActConfession />
 
       {/* ACT IV: Storm Before Choice */}
