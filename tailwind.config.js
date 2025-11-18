@@ -13,6 +13,8 @@ export default {
         mona: ['Mona Sans', 'system-ui', 'sans-serif'],
         'ibm-plex': ['IBM Plex Sans', 'system-ui', 'sans-serif'],
         manrope: ['Manrope', 'system-ui', 'sans-serif'],
+        cinzel: ['Cinzel', 'serif'],
+        cormorant: ['Cormorant', 'serif']
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
